@@ -174,21 +174,21 @@ function AB:SetupSymbolBar()
 	frame:SetScript("OnEnter", Letter_OnEnter);
 	frame:SetScript("OnLeave", Letter_OnLeave);
 
-	AB:CreateSymbolButton("EMB_Character", "C", CHARACTER_BUTTON, function() 
+	AB:CreateSymbolButton("EMB_Character", "C", MicroButtonTooltipText(CHARACTER_INFO, "TOGGLECHARACTER0"), function()
 		if(CharacterFrame:IsShown()) then
 			HideUIPanel(CharacterFrame);
 		else
 			ShowUIPanel(CharacterFrame);
 		end
 	end);
-	AB:CreateSymbolButton("EMB_Spellbook", "S", SPELLBOOK_ABILITIES_BUTTON, function() 
+	AB:CreateSymbolButton("EMB_Spellbook", "S", MicroButtonTooltipText(SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK"), function()
 		if(SpellBookFrame:IsShown()) then
 			HideUIPanel(SpellBookFrame);
 		else
 			ShowUIPanel(SpellBookFrame);
 		end
 	end);
-	AB:CreateSymbolButton("EMB_Talents", "T", TALENTS_BUTTON, function()
+	AB:CreateSymbolButton("EMB_Talents", "T", MicroButtonTooltipText(TALENTS_BUTTON, "TOGGLETALENTS"), function()
 		if(UnitLevel("player") >= 10) then
 			if(PlayerTalentFrame) then
 				if(PlayerTalentFrame:IsShown()) then
@@ -202,20 +202,20 @@ function AB:SetupSymbolBar()
 			end
 		end
 	end)
-	AB:CreateSymbolButton("EMB_Achievement", "A", ACHIEVEMENT_BUTTON, function() ToggleAchievementFrame(); end);
-	AB:CreateSymbolButton("EMB_Quest", "Q", QUESTLOG_BUTTON, function()
+	AB:CreateSymbolButton("EMB_Achievement", "A", MicroButtonTooltipText(ACHIEVEMENT_BUTTON, "TOGGLEACHIEVEMENT"), function() ToggleAchievementFrame(); end);
+	AB:CreateSymbolButton("EMB_Quest", "Q", MicroButtonTooltipText(QUESTLOG_BUTTON, "TOGGLEQUESTLOG"), function()
 		if(QuestLogFrame:IsShown()) then
 			HideUIPanel(QuestLogFrame);
 		else
 			ShowUIPanel(QuestLogFrame);
 		end
 	end);
-	AB:CreateSymbolButton("EMB_Guild", "G", GUILD, function() ToggleGuildFrame(); end);
-	AB:CreateSymbolButton("EMB_PVP", "P", PLAYER_V_PLAYER, function() TogglePVPFrame(); end)
-	AB:CreateSymbolButton("EMB_LFD", "D", DUNGEONS_BUTTON, function() ToggleLFDParentFrame(); end);
-	AB:CreateSymbolButton("EMB_EJ", "E", ENCOUNTER_JOURNAL, function() ToggleEncounterJournal(); end)
-	AB:CreateSymbolButton("EMB_Raid", "R", RAID_FINDER, function() ToggleRaidFrame(); end)
-	AB:CreateSymbolButton("EMB_MenuSys", "M", MAINMENU_BUTTON, function()
+	AB:CreateSymbolButton("EMB_Guild", "G",  MicroButtonTooltipText(GUILD, "TOGGLEGUILDTAB"), function() ToggleGuildFrame(); end);
+	AB:CreateSymbolButton("EMB_PVP", "P", MicroButtonTooltipText(PLAYER_V_PLAYER, "TOGGLECHARACTER4"), function() TogglePVPFrame(); end)
+	AB:CreateSymbolButton("EMB_LFD", "D", MicroButtonTooltipText(DUNGEONS_BUTTON, "TOGGLELFGPARENT"), function() ToggleLFDParentFrame(); end);
+	AB:CreateSymbolButton("EMB_Journal", "E", MicroButtonTooltipText(ENCOUNTER_JOURNAL, "TOGGLEENCOUNTERJOURNAL"), function() ToggleEncounterJournal(); end);
+	AB:CreateSymbolButton("EMB_LFR", "R", MicroButtonTooltipText(RAID_FINDER, "TOGGLERAIDFINDER"), function() ToggleRaidFrame(); end);
+	AB:CreateSymbolButton("EMB_MenuSys", "M", MicroButtonTooltipText(MAINMENU_BUTTON, "TOGGLEGAMEMENU"), function()
 		if(GameMenuFrame:IsShown()) then
 			HideUIPanel(GameMenuFrame);
 		else
@@ -272,7 +272,7 @@ function AB:UpdateMicroPositionDimensions()
 	if(not Sbuttons[1]) then return; end
 	AB:MenuShow();
 	local numRowsS = 1;
-	for i=1, #MICRO_BUTTONS do
+	for i=1, #Sbuttons do
 		local button = Sbuttons[i];
 		local prevButton = Sbuttons[i-1] or ElvUI_MicroBarS;
 		local lastColumnButton = Sbuttons[i-self.db.microbar.buttonsPerRow];
@@ -336,19 +336,17 @@ function AB:MenuShow()
 	end
 end
 
--- function AB:CreateUIButton()
-	-- UB:CreateDropdownButton(true, "Addon", "Microbar", L["Micro Bar"], L["Micro Bar"], nil, function() E:ToggleConfig(); LibStub("AceConfigDialog-3.0"):SelectGroup("ElvUI", "actionbar", "microbar") end)
--- end
-
 function AB:EnhancementInit()
 	EP:RegisterPlugin(addon, AB.GetOptions);
 	AB:SetupSymbolBar();
-	AB:MicroScale();
 	AB:MenuShow();
-
-	-- if not IsAddOnLoaded("ElvUI_SLE") then return end
-	-- UB = E:GetModule("SLE_UIButtons");
-	-- hooksecurefunc(UB, "InsertButtons", AB.CreateUIButton)
 end
 
-hooksecurefunc(AB, "Initialize", AB.EnhancementInit)
+hooksecurefunc(AB, "SetupMicroBar", AB.EnhancementInit)
+
+local f = CreateFrame("Frame");
+f:RegisterEvent("PLAYER_ENTERING_WORLD");
+f:SetScript("OnEvent", function(self)
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
+	AB:MicroScale();
+end);
