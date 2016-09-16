@@ -217,8 +217,10 @@ function AB:SetupSymbolBar()
 	AB:CreateSymbolButton("EMB_LFR", "R", MicroButtonTooltipText(RAID_FINDER, "TOGGLERAIDFINDER"), function() ToggleRaidFrame(); end);
 	AB:CreateSymbolButton("EMB_MenuSys", "M", MicroButtonTooltipText(MAINMENU_BUTTON, "TOGGLEGAMEMENU"), function()
 		if(GameMenuFrame:IsShown()) then
+			PlaySound("igMainMenuQuit");
 			HideUIPanel(GameMenuFrame);
 		else
+			PlaySound("igMainMenuOpen");
 			ShowUIPanel(GameMenuFrame);
 		end
 	end);
