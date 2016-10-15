@@ -1,23 +1,4 @@
-﻿-------------------------------------------------
---
--- ElvUI Microbar Enhancement by Darth Predator
--- Дартпредатор - Вечная Песня (Eversong) RU
---
--------------------------------------------------
---
--- Thanks to / Благодарности:
--- Elv and ElvUI community
--- Blazeflack for helping with option storage and profile changing
---
--------------------------------------------------
---
--- Usage / Использование:
--- Just install and configure for yourself
--- Устанавливаем, настраиваем и получаем профит
---
--------------------------------------------------
-
-local E, L, V, P, G, _ =  unpack(ElvUI);
+﻿local E, L, V, P, G, _ =  unpack(ElvUI);
 local AB = E:GetModule("ActionBars");
 local EP = LibStub("LibElvUIPlugin-1.0")
 local S = E:GetModule("Skins")
@@ -55,6 +36,7 @@ function AB:GetOptions()
 		desc = L["Sets Scale of the Micro Bar"],
 		isPercent = true,
 		min = 0.3, max = 2, step = 0.01,
+		disabled = function() return not AB.db.microbar.enabled end,
 		get = function(info) return AB.db.microbar.scale end,
 		set = function(info, value) AB.db.microbar.scale = value; AB:UpdateMicroPositionDimensions(); end
 	};
@@ -70,7 +52,7 @@ function AB:GetOptions()
 		order = 7,
 		type = "toggle",
 		name = L["As Letters"],
-		desc = L["Replace icons with just letters.\n|cffFF0000Warning:|r this will disable original Blizzard's tooltips for microbar."],
+		desc = L["Replace icons with letters"],
 		disabled = function() return not AB.db.microbar.enabled end,
 		get = function(info) return AB.db.microbar.symbolic end,
 		set = function(info, value) AB.db.microbar.symbolic = value; AB:MenuShow(); end
