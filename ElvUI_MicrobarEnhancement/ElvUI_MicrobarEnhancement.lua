@@ -1,32 +1,14 @@
-﻿local E, L, V, P, G, _ =  unpack(ElvUI);
+﻿local E, L, V, P, G =  unpack(ElvUI);
 local AB = E:GetModule("ActionBars");
 local EP = LibStub("LibElvUIPlugin-1.0")
 local S = E:GetModule("Skins")
 local addon = ...
-local UB
 
 P.actionbar.microbar.scale = 1
 P.actionbar.microbar.symbolic = false
 P.actionbar.microbar.backdrop = false
 P.actionbar.microbar.colorS = {r = 1,g = 1,b = 1 }
 P.actionbar.microbar.classColor = false
-
-local MICRO_BUTTONS = {
-	'CharacterMicroButton',
-	'SpellbookMicroButton',
-	'TalentMicroButton',
-	'AchievementMicroButton',
-	'QuestLogMicroButton',
-	'GuildMicroButton',
-	'PVPMicroButton',
-	'LFDMicroButton',
-	'EJMicroButton',
-	'RaidMicroButton',
-	'MainMenuMicroButton',
-	'HelpMicroButton'
-};
-
-local Sbuttons = {}
 
 function AB:GetOptions()
 	E.Options.args.actionbar.args.microbar.args.scale = {
@@ -83,6 +65,31 @@ function AB:GetOptions()
 	};
 end
 
+local _G = _G
+local tinsert = tinsert
+
+local HideUIPanel, ShowUIPanel = HideUIPanel, ShowUIPanel
+local GameTooltip = GameTooltip
+local UnitLevel = UnitLevel
+local LoadAddOn = LoadAddOn
+
+local MICRO_BUTTONS = {
+	"CharacterMicroButton",
+	"SpellbookMicroButton",
+	"TalentMicroButton",
+	"AchievementMicroButton",
+	"QuestLogMicroButton",
+	"GuildMicroButton",
+	"PVPMicroButton",
+	"LFDMicroButton",
+	"EJMicroButton",
+	"RaidMicroButton",
+	"MainMenuMicroButton",
+	"HelpMicroButton"
+};
+
+local Sbuttons = {}
+
 function AB:MicroScale()
 	ElvUI_MicroBar.mover:SetWidth(AB.MicroWidth*AB.db.microbar.scale);
 	ElvUI_MicroBar.mover:SetHeight(AB.MicroHeight*AB.db.microbar.scale);
@@ -111,16 +118,21 @@ end
 
 function AB:CreateSymbolButton(name, text, tooltip, click)
 	local button = CreateFrame("Button", name, ElvUI_MicroBarS);
-	button:SetScript("OnClick", click);
-	if(tooltip) then
+	if click then button:SetScript("OnClick", click) end
+	button.tooltip = tooltip
+	button.updateInterval = 0
+	if tooltip then
 		button:SetScript("OnEnter", function(self)
 			Letter_OnEnter();
+			button.hover = 1
+			button.updateInterval = 0
 			GameTooltip:SetOwner(self);
-			GameTooltip:AddLine(tooltip, 1, 1, 1, 1, 1, 1);
+			GameTooltip:AddLine(button.tooltip, 1, 1, 1, 1, 1, 1)
 			GameTooltip:Show();
 		end);
 		button:SetScript("OnLeave", function(self)
 			Letter_OnLeave();
+			button.hover = nil
 			GameTooltip:Hide();
 		end);
 	else
@@ -256,7 +268,7 @@ function AB:UpdateMicroPositionDimensions()
 	if(not Sbuttons[1]) then return; end
 	AB:MenuShow();
 	local numRowsS = 1;
-	for i=1, #Sbuttons do
+	for i = 1, #Sbuttons do
 		local button = Sbuttons[i];
 		local prevButton = Sbuttons[i-1] or ElvUI_MicroBarS;
 		local lastColumnButton = Sbuttons[i-self.db.microbar.buttonsPerRow];
@@ -324,6 +336,17 @@ function AB:EnhancementInit()
 	EP:RegisterPlugin(addon, AB.GetOptions);
 	AB:SetupSymbolBar();
 	AB:MenuShow();
+
+	_G["EMB_MenuSys"]:SetScript("OnUpdate", function(self, elapsed)
+		if self.updateInterval > 0 then
+			self.updateInterval = self.updateInterval - elapsed
+		else
+			self.updateInterval = PERFORMANCEBAR_UPDATE_INTERVAL
+			if self.hover then
+				MainMenuBarPerformanceBarFrame_OnEnter(_G["MainMenuMicroButton"])
+			end
+		end
+	end)
 end
 
 hooksecurefunc(AB, "SetupMicroBar", AB.EnhancementInit)
