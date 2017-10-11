@@ -7,62 +7,75 @@ local addon = ...
 P.actionbar.microbar.scale = 1
 P.actionbar.microbar.symbolic = false
 P.actionbar.microbar.backdrop = false
-P.actionbar.microbar.colorS = {r = 1,g = 1,b = 1 }
+P.actionbar.microbar.colorS = {r = 1, g = 1, b = 1}
 P.actionbar.microbar.classColor = false
 
 function AB:GetOptions()
-	E.Options.args.actionbar.args.microbar.args.scale = {
-		order = 5,
-		type = "range",
-		name = L["Set Scale"],
-		desc = L["Sets Scale of the Micro Bar"],
-		isPercent = true,
-		min = 0.3, max = 2, step = 0.01,
-		disabled = function() return not AB.db.microbar.enabled end,
-		get = function(info) return AB.db.microbar.scale end,
-		set = function(info, value) AB.db.microbar.scale = value; AB:UpdateMicroPositionDimensions(); end
-	};
-	E.Options.args.actionbar.args.microbar.args.backdrop = {
-		order = 6,
-		type = "toggle",
-		name = L["Backdrop"],
-		disabled = function() return not AB.db.microbar.enabled end,
-		get = function(info) return AB.db.microbar.backdrop end,
-		set = function(info, value) AB.db.microbar.backdrop = value; AB:UpdateMicroPositionDimensions(); end
-	};
-	E.Options.args.actionbar.args.microbar.args.symbolic = {
-		order = 7,
-		type = "toggle",
-		name = L["As Letters"],
-		desc = L["Replace icons with letters"],
-		disabled = function() return not AB.db.microbar.enabled end,
-		get = function(info) return AB.db.microbar.symbolic end,
-		set = function(info, value) AB.db.microbar.symbolic = value; AB:MenuShow(); end
-	};
-	E.Options.args.actionbar.args.microbar.args.color = {
-		order = 8,
-		type = "color",
-		name = L["Text Color"],
-		get = function(info)
-			local t = AB.db.microbar.colorS;
-			local d = P.actionbar.microbar.colorS;
-			return t.r, t.g, t.b, d.r, d.g, d.b;
-		end,
-		set = function(info, r, g, b)
-			local t = AB.db.microbar.colorS;
-			t.r, t.g, t.b = r, g, b;
-			AB:SetSymbloColor();
-		end,
-		disabled = function() return not AB.db.microbar.enabled or AB.db.microbar.classColor; end
-	};
-	E.Options.args.actionbar.args.microbar.args.classColor = {
-		order = 9,
-		type = "toggle",
-		name = CLASS,
-		disabled = function() return not AB.db.microbar.enabled; end,
-		get = function(info) return AB.db.microbar.classColor; end,
-		set = function(info, value) AB.db.microbar.classColor = value; AB:SetSymbloColor(); end
-	};
+	E.Options.args.actionbar.args.microbar.args.microbarEnhanced = {
+		order = 10,
+		type = "group",
+		name = "Microbar Enhancement",
+		guiInline = true,
+		args = {
+			backdrop = {
+				order = 1,
+				type = "toggle",
+				name = L["Backdrop"],
+				disabled = function() return not AB.db.microbar.enabled end,
+				get = function(info) return AB.db.microbar.backdrop end,
+				set = function(info, value) AB.db.microbar.backdrop = value AB:UpdateMicroPositionDimensions() end
+			},
+			scale = {
+				order = 2,
+				type = "range",
+				name = L["Scale"],
+				desc = L["Sets Scale of the Micro Bar"],
+				isPercent = true,
+				min = 0.3, max = 2, step = 0.01,
+				disabled = function() return not AB.db.microbar.enabled end,
+				get = function(info) return AB.db.microbar.scale end,
+				set = function(info, value) AB.db.microbar.scale = value AB:UpdateMicroPositionDimensions() end
+			},
+			spacer = {
+				order = 3,
+				type = "description",
+				name = " "
+			},
+			symbolic = {
+				order = 4,
+				type = "toggle",
+				name = L["As Letters"],
+				desc = L["Replace icons with letters"],
+				disabled = function() return not AB.db.microbar.enabled end,
+				get = function(info) return AB.db.microbar.symbolic end,
+				set = function(info, value) AB.db.microbar.symbolic = value AB:MenuShow() end
+			},
+			classColor = {
+				order = 5,
+				type = "toggle",
+				name = CLASS,
+				disabled = function() return not AB.db.microbar.enabled or not AB.db.microbar.symbolic end,
+				get = function(info) return AB.db.microbar.classColor end,
+				set = function(info, value) AB.db.microbar.classColor = value AB:SetSymbloColor() end
+			},
+			color = {
+				order = 6,
+				type = "color",
+				name = L["Text Color"],
+				get = function(info)
+					local t = AB.db.microbar.colorS
+					local d = P.actionbar.microbar.colorS
+					return t.r, t.g, t.b, d.r, d.g, d.b
+				end,
+				set = function(info, r, g, b)
+					local t = AB.db.microbar.colorS
+					t.r, t.g, t.b = r, g, b
+					AB:SetSymbloColor()
+				end,
+				disabled = function() return not AB.db.microbar.enabled or AB.db.microbar.classColor or not AB.db.microbar.symbolic end
+			},
+		}
+	}
 end
 
 local _G = _G
@@ -72,21 +85,6 @@ local HideUIPanel, ShowUIPanel = HideUIPanel, ShowUIPanel
 local GameTooltip = GameTooltip
 local UnitLevel = UnitLevel
 local LoadAddOn = LoadAddOn
-
-local MICRO_BUTTONS = {
-	"CharacterMicroButton",
-	"SpellbookMicroButton",
-	"TalentMicroButton",
-	"AchievementMicroButton",
-	"QuestLogMicroButton",
-	"GuildMicroButton",
-	"PVPMicroButton",
-	"LFDMicroButton",
-	"EJMicroButton",
-	"RaidMicroButton",
-	"MainMenuMicroButton",
-	"HelpMicroButton"
-};
 
 local Sbuttons = {}
 
