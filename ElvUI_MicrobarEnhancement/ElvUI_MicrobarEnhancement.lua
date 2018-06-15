@@ -13,6 +13,7 @@ local UnitLevel = UnitLevel
 local LoadAddOn = LoadAddOn
 local MainMenuBarPerformanceBarFrame_OnEnter = MainMenuBarPerformanceBarFrame_OnEnter
 local MicroButtonTooltipText = MicroButtonTooltipText
+local ToggleFrame = ToggleFrame
 local ToggleAchievementFrame = ToggleAchievementFrame
 local ToggleGuildFrame = ToggleGuildFrame
 local TogglePVPFrame = TogglePVPFrame
@@ -28,6 +29,7 @@ local COLOR = COLOR
 
 P.actionbar.microbar.symbolic = false
 P.actionbar.microbar.backdrop = false
+P.actionbar.microbar.transparentBackdrop = false
 P.actionbar.microbar.classColor = false
 P.actionbar.microbar.xOffset = 0
 P.actionbar.microbar.yOffset = 0
@@ -48,31 +50,21 @@ function AB:GetOptions()
 				get = function(info) return AB.db.microbar.backdrop end,
 				set = function(info, value) AB.db.microbar.backdrop = value AB:UpdateMicroPositionDimensions() end
 			},
-			xOffset = {
+			transparentBackdrop = {
 				order = 2,
-				type = "range",
-				name = L["X-Offset"],
-				min = 0, max = 20, step = 1,
-				disabled = function() return not AB.db.microbar.enabled end,
-				get = function(info) return AB.db.microbar.xOffset end,
-				set = function(info, value) AB.db.microbar.xOffset = value AB:UpdateMicroPositionDimensions() end
+				type = "toggle",
+				name = L["Transparent Backdrop"],
+				disabled = function() return not AB.db.microbar.enabled or not AB.db.microbar.backdrop end,
+				get = function(info) return AB.db.microbar.transparentBackdrop end,
+				set = function(info, value) AB.db.microbar.transparentBackdrop = value AB:UpdateMicroPositionDimensions() end
 			},
-			yOffset = {
+			spacer1 = {
 				order = 3,
-				type = "range",
-				name = L["Y-Offset"],
-				min = 0, max = 20, step = 1,
-				disabled = function() return not AB.db.microbar.enabled end,
-				get = function(info) return AB.db.microbar.yOffset end,
-				set = function(info, value) AB.db.microbar.yOffset = value AB:UpdateMicroPositionDimensions() end
-			},
-			spacer = {
-				order = 4,
 				type = "description",
 				name = " "
 			},
 			symbolic = {
-				order = 5,
+				order = 4,
 				type = "toggle",
 				name = L["As Letters"],
 				desc = L["Replace icons with letters"],
@@ -81,7 +73,7 @@ function AB:GetOptions()
 				set = function(info, value) AB.db.microbar.symbolic = value AB:MenuShow() end
 			},
 			classColor = {
-				order = 6,
+				order = 5,
 				type = "toggle",
 				name = L["Use Class Color"],
 				disabled = function() return not AB.db.microbar.enabled or not AB.db.microbar.symbolic end,
@@ -89,7 +81,7 @@ function AB:GetOptions()
 				set = function(info, value) AB.db.microbar.classColor = value AB:SetSymbloColor() end
 			},
 			color = {
-				order = 7,
+				order = 6,
 				type = "color",
 				name = COLOR,
 				get = function(info)
@@ -103,6 +95,29 @@ function AB:GetOptions()
 					AB:SetSymbloColor()
 				end,
 				disabled = function() return not AB.db.microbar.enabled or AB.db.microbar.classColor or not AB.db.microbar.symbolic end
+			},
+			spacer2 = {
+				order = 7,
+				type = "description",
+				name = " "
+			},
+			xOffset = {
+				order = 8,
+				type = "range",
+				name = L["X-Offset"],
+				min = 0, max = 20, step = 1,
+				disabled = function() return not AB.db.microbar.enabled end,
+				get = function(info) return AB.db.microbar.xOffset end,
+				set = function(info, value) AB.db.microbar.xOffset = value AB:UpdateMicroPositionDimensions() end
+			},
+			yOffset = {
+				order = 9,
+				type = "range",
+				name = L["Y-Offset"],
+				min = 0, max = 20, step = 1,
+				disabled = function() return not AB.db.microbar.enabled end,
+				get = function(info) return AB.db.microbar.yOffset end,
+				set = function(info, value) AB.db.microbar.yOffset = value AB:UpdateMicroPositionDimensions() end
 			}
 		}
 	}
@@ -267,6 +282,12 @@ function AB:UpdateMicroPositionDimensions()
 		ElvUI_MicroBar:CreateBackdrop("Transparent")
 	end
 
+	local style = self.db.microbar.transparentBackdrop and "Transparent" or "Default"
+	if ElvUI_MicroBar then
+		ElvUI_MicroBar.backdrop:SetTemplate(style)
+		ElvUI_MicroBar.backdrop:Point("BOTTOMLEFT", 0, 1)
+	end
+
 	if ElvUI_MicroBar.mover then
 		if self.db.microbar.enabled then
 			E:EnableMover(ElvUI_MicroBar.mover:GetName())
@@ -305,6 +326,11 @@ function AB:UpdateMicroPositionDimensions()
 
 	if not ElvUI_MicroBarS.backdrop then
 		ElvUI_MicroBarS:CreateBackdrop("Transparent")
+	end
+
+	if ElvUI_MicroBar then
+		ElvUI_MicroBarS.backdrop:SetTemplate(style)
+		ElvUI_MicroBarS.backdrop:Point("BOTTOMLEFT", 0, 1)
 	end
 
 	if AB.db.microbar.backdrop then
