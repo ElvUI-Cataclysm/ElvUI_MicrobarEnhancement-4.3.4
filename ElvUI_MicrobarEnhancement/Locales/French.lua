@@ -1,7 +1,7 @@
-﻿-- English localization file for enGB.
+-- French localization file for frFR.
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("ElvUI", "enUS", true)
-if not L then return end
+local L = AceLocale:NewLocale("ElvUI", "frFR")
+if not L then return; end
 
 -- Config
 L["As Letters"] = true

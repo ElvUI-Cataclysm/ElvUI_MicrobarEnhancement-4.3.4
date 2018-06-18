@@ -5,5 +5,5 @@
 ## RequiredDeps: ElvUI
 ## DefaultState: Enabled
 
-locales\load_locales.xml
+Locales\Load_Locales.xml
 ElvUI_MicrobarEnhancement.lua

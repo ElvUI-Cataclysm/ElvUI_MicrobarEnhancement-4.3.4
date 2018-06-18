@@ -198,9 +198,21 @@ function AB:SetupSymbolBar()
 	frame:SetScript("OnEnter", onEnter)
 	frame:SetScript("OnLeave", onLeave)
 
-	AB:CreateSymbolButton("EMB_Character", "C", MicroButtonTooltipText(CHARACTER_INFO, "TOGGLECHARACTER0"), function() ToggleFrame(_G["CharacterFrame"]) end)
-	AB:CreateSymbolButton("EMB_Spellbook", "S", MicroButtonTooltipText(SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK"), function() ToggleFrame(_G["SpellBookFrame"]) end)
-	AB:CreateSymbolButton("EMB_Talents", "T", MicroButtonTooltipText(TALENTS_BUTTON, "TOGGLETALENTS"), function()
+	frame.visibility = CreateFrame("Frame", nil, E.UIParent)
+	frame.visibility:SetScript("OnShow", function()
+		if AB.db.microbar.symbolic then
+			frame:Show()
+			ElvUI_MicroBar:Hide()
+		else
+			frame:Hide()
+			ElvUI_MicroBar:Show()
+		end
+	end)
+	frame.visibility:SetScript("OnHide", function() frame:Hide() end)
+
+	AB:CreateSymbolButton("EMB_Character", L["CHARACTER_SYMBOL"], MicroButtonTooltipText(CHARACTER_INFO, "TOGGLECHARACTER0"), function() ToggleFrame(_G["CharacterFrame"]) end)
+	AB:CreateSymbolButton("EMB_Spellbook", L["SPELLBOOK_SYMBOL"], MicroButtonTooltipText(SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK"), function() ToggleFrame(_G["SpellBookFrame"]) end)
+	AB:CreateSymbolButton("EMB_Talents", L["TALENTS_SYMBOL"], MicroButtonTooltipText(TALENTS_BUTTON, "TOGGLETALENTS"), function()
 		if UnitLevel("player") >= 10 then
 			if PlayerTalentFrame then
 				if PlayerTalentFrame:IsShown() then
@@ -214,20 +226,20 @@ function AB:SetupSymbolBar()
 			end
 		end
 	end)
-	AB:CreateSymbolButton("EMB_Achievement", "A", MicroButtonTooltipText(ACHIEVEMENT_BUTTON, "TOGGLEACHIEVEMENT"), function() ToggleAchievementFrame() end)
-	AB:CreateSymbolButton("EMB_Quest", "Q", MicroButtonTooltipText(QUESTLOG_BUTTON, "TOGGLEQUESTLOG"), function()
+	AB:CreateSymbolButton("EMB_Achievement", L["ACHIEVEMENT_SYMBOL"], MicroButtonTooltipText(ACHIEVEMENT_BUTTON, "TOGGLEACHIEVEMENT"), function() ToggleAchievementFrame() end)
+	AB:CreateSymbolButton("EMB_Quest", L["QUEST_SYMBOL"], MicroButtonTooltipText(QUESTLOG_BUTTON, "TOGGLEQUESTLOG"), function()
 		if QuestLogFrame:IsShown() then
 			HideUIPanel(QuestLogFrame)
 		else
 			ShowUIPanel(QuestLogFrame)
 		end
 	end)
-	AB:CreateSymbolButton("EMB_Guild", "G",  MicroButtonTooltipText(GUILD, "TOGGLEGUILDTAB"), function() ToggleGuildFrame() end)
-	AB:CreateSymbolButton("EMB_PVP", "P", MicroButtonTooltipText(PLAYER_V_PLAYER, "TOGGLECHARACTER4"), function() TogglePVPFrame() end)
-	AB:CreateSymbolButton("EMB_LFD", "D", MicroButtonTooltipText(DUNGEONS_BUTTON, "TOGGLELFGPARENT"), function() ToggleLFDParentFrame() end)
-	AB:CreateSymbolButton("EMB_Journal", "E", MicroButtonTooltipText(ENCOUNTER_JOURNAL, "TOGGLEENCOUNTERJOURNAL"), function() ToggleEncounterJournal() end)
-	AB:CreateSymbolButton("EMB_LFR", "R", MicroButtonTooltipText(RAID_FINDER, "TOGGLERAIDFINDER"), function() ToggleRaidFrame() end)
-	AB:CreateSymbolButton("EMB_MenuSys", "M", MicroButtonTooltipText(MAINMENU_BUTTON, "TOGGLEGAMEMENU"), function()
+	AB:CreateSymbolButton("EMB_Guild", L["GUILD_SYMBOL"],  MicroButtonTooltipText(GUILD, "TOGGLEGUILDTAB"), function() ToggleGuildFrame() end)
+	AB:CreateSymbolButton("EMB_PVP", L["PVP_SYMBOL"], MicroButtonTooltipText(PLAYER_V_PLAYER, "TOGGLECHARACTER4"), function() TogglePVPFrame() end)
+	AB:CreateSymbolButton("EMB_LFD", L["LFD_SYMBOL"], MicroButtonTooltipText(DUNGEONS_BUTTON, "TOGGLELFGPARENT"), function() ToggleLFDParentFrame() end)
+	AB:CreateSymbolButton("EMB_Journal", L["JOURNAL_SYMBOL"], MicroButtonTooltipText(ENCOUNTER_JOURNAL, "TOGGLEENCOUNTERJOURNAL"), function() ToggleEncounterJournal() end)
+	AB:CreateSymbolButton("EMB_LFR", L["LFR_SYMBOL"], MicroButtonTooltipText(RAID_FINDER, "TOGGLERAIDFINDER"), function() ToggleRaidFrame() end)
+	AB:CreateSymbolButton("EMB_MenuSys", L["MENU_SYMBOL"], MicroButtonTooltipText(MAINMENU_BUTTON, "TOGGLEGAMEMENU"), function()
 		if GameMenuFrame:IsShown() then
 			PlaySound("igMainMenuQuit")
 			HideUIPanel(GameMenuFrame)
@@ -236,9 +248,25 @@ function AB:SetupSymbolBar()
 			ShowUIPanel(GameMenuFrame)
 		end
 	end)
-	AB:CreateSymbolButton("EMB_Help", "?", HELP_BUTTON, function() ToggleHelpFrame() end)
+	AB:CreateSymbolButton("EMB_Help", L["HELP_SYMBOL"], HELP_BUTTON, function() ToggleHelpFrame() end)
 
 	AB:UpdateMicroPositionDimensions()
+end
+
+function AB:UpdateMicroBarVisibility()
+	if InCombatLockdown() then
+		AB.NeedsUpdateMicroBarVisibility = true
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		return
+	end
+
+	local visibility = self.db.microbar.visibility
+	if visibility and visibility:match("[\n\r]") then
+		visibility = visibility:gsub("[\n\r]","")
+	end
+
+	RegisterStateDriver(ElvUI_MicroBar.visibility, "visibility", (self.db.microbar.enabled and visibility) or "hide")
+	RegisterStateDriver(ElvUI_MicroBarS.visibility, "visibility", (self.db.microbar.enabled and visibility) or "hide")
 end
 
 function AB:UpdateMicroPositionDimensions()
@@ -279,11 +307,11 @@ function AB:UpdateMicroPositionDimensions()
 	ElvUI_MicroBar:Size(AB.MicroWidth, AB.MicroHeight)
 
 	if not ElvUI_MicroBar.backdrop then
-		ElvUI_MicroBar:CreateBackdrop("Transparent")
+		ElvUI_MicroBar:CreateBackdrop()
 	end
 
 	local style = self.db.microbar.transparentBackdrop and "Transparent" or "Default"
-	if ElvUI_MicroBar then
+	if ElvUI_MicroBar.backdrop then
 		ElvUI_MicroBar.backdrop:SetTemplate(style)
 		ElvUI_MicroBar.backdrop:Point("BOTTOMLEFT", 0, 1)
 	end
@@ -325,10 +353,10 @@ function AB:UpdateMicroPositionDimensions()
 	ElvUI_MicroBarS:Size(AB.MicroWidth, AB.MicroHeight)
 
 	if not ElvUI_MicroBarS.backdrop then
-		ElvUI_MicroBarS:CreateBackdrop("Transparent")
+		ElvUI_MicroBarS:CreateBackdrop()
 	end
 
-	if ElvUI_MicroBar then
+	if ElvUI_MicroBarS.backdrop then
 		ElvUI_MicroBarS.backdrop:SetTemplate(style)
 		ElvUI_MicroBarS.backdrop:Point("BOTTOMLEFT", 0, 1)
 	end
@@ -348,11 +376,12 @@ function AB:UpdateMicroPositionDimensions()
 	end
 
 	AB:SetSymbloColor()
+	AB:UpdateMicroBarVisibility()
 end
 
 function AB:MenuShow()
-	if AB.db.microbar.symbolic then
-		if AB.db.microbar.enabled then
+	if AB.db.microbar.enabled then
+		if AB.db.microbar.symbolic then
 			ElvUI_MicroBar:Hide()
 			ElvUI_MicroBarS:Show()
 			if not AB.db.microbar.mouseover then
@@ -360,12 +389,14 @@ function AB:MenuShow()
 			end
 		else
 			ElvUI_MicroBarS:Hide()
-		end
-	else
-		if AB.db.microbar.enabled then
 			ElvUI_MicroBar:Show()
 		end
-		ElvUI_MicroBarS:Hide()
+	else
+		if AB.db.microbar.symbolic then
+			ElvUI_MicroBarS:Hide()
+		else
+			ElvUI_MicroBar:Hide()
+		end
 	end
 end
 
@@ -373,6 +404,17 @@ function AB:EnhancementInit()
 	EP:RegisterPlugin(addon, AB.GetOptions)
 	AB:SetupSymbolBar()
 	AB:MenuShow()
+
+	ElvUI_MicroBar.visibility:SetScript("OnShow", function()
+		if not AB.db.microbar.symbolic then
+			ElvUI_MicroBar:Hide()
+			ElvUI_MicroBarS:Show()
+		else
+			ElvUI_MicroBar:Show()
+			ElvUI_MicroBarS:Hide()
+		end
+	end)
+	ElvUI_MicroBar.visibility:SetScript("OnHide", function() ElvUI_MicroBar:Hide() end)
 
 	_G["EMB_MenuSys"]:SetScript("OnUpdate", function(self, elapsed)
 		if self.updateInterval > 0 then
