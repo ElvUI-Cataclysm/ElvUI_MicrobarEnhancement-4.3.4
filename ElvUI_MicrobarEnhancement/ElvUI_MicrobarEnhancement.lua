@@ -58,7 +58,7 @@ function AB:GetOptions()
 				get = function(info) return AB.db.microbar.transparentBackdrop end,
 				set = function(info, value) AB.db.microbar.transparentBackdrop = value AB:UpdateMicroPositionDimensions() end
 			},
-			spacer1 = {
+			spacer = {
 				order = 3,
 				type = "description",
 				name = " "
@@ -70,7 +70,7 @@ function AB:GetOptions()
 				desc = L["Replace icons with letters"],
 				disabled = function() return not AB.db.microbar.enabled end,
 				get = function(info) return AB.db.microbar.symbolic end,
-				set = function(info, value) AB.db.microbar.symbolic = value AB:MenuShow() end
+				set = function(info, value) AB.db.microbar.symbolic = value AB:UpdateMicroBarVisibility() end
 			},
 			classColor = {
 				order = 5,
@@ -128,7 +128,6 @@ local Sbuttons = {}
 E.UpdateAllMB = E.UpdateAll
 function E:UpdateAll()
     E.UpdateAllMB(self)
-	AB:MenuShow()
 end
 
 local function onEnter()
@@ -184,7 +183,7 @@ function AB:CreateSymbolButton(name, text, tooltip, click)
 end
 
 function AB:SetSymbloColor()
-	local color = AB.db.microbar.classColor and (E.myclass == "PRIEST" and E.PriestColors or (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass])) or AB.db.microbar.colorS
+	local color = self.db.microbar.classColor and (E.myclass == "PRIEST" and E.PriestColors or (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass])) or self.db.microbar.colorS
 
 	for i = 1, #Sbuttons do
 		Sbuttons[i].text:SetTextColor(color.r, color.g, color.b)
@@ -199,15 +198,7 @@ function AB:SetupSymbolBar()
 	frame:SetScript("OnLeave", onLeave)
 
 	frame.visibility = CreateFrame("Frame", nil, E.UIParent)
-	frame.visibility:SetScript("OnShow", function()
-		if AB.db.microbar.symbolic then
-			frame:Show()
-			ElvUI_MicroBar:Hide()
-		else
-			frame:Hide()
-			ElvUI_MicroBar:Show()
-		end
-	end)
+	frame.visibility:SetScript("OnShow", function() frame:Show() end)
 	frame.visibility:SetScript("OnHide", function() frame:Hide() end)
 
 	AB:CreateSymbolButton("EMB_Character", L["CHARACTER_SYMBOL"], MicroButtonTooltipText(CHARACTER_INFO, "TOGGLECHARACTER0"), function() ToggleFrame(_G["CharacterFrame"]) end)
@@ -265,8 +256,13 @@ function AB:UpdateMicroBarVisibility()
 		visibility = visibility:gsub("[\n\r]","")
 	end
 
-	RegisterStateDriver(ElvUI_MicroBar.visibility, "visibility", (self.db.microbar.enabled and visibility) or "hide")
-	RegisterStateDriver(ElvUI_MicroBarS.visibility, "visibility", (self.db.microbar.enabled and visibility) or "hide")
+	if self.db.microbar.symbolic then
+		RegisterStateDriver(ElvUI_MicroBar.visibility, "visibility", "hide")
+		RegisterStateDriver(ElvUI_MicroBarS.visibility, "visibility", (self.db.microbar.enabled and visibility) or "hide")
+	else
+		RegisterStateDriver(ElvUI_MicroBarS.visibility, "visibility", "hide")
+		RegisterStateDriver(ElvUI_MicroBar.visibility, "visibility", (self.db.microbar.enabled and visibility) or "hide")
+	end
 end
 
 function AB:UpdateMicroPositionDimensions()
@@ -296,7 +292,7 @@ function AB:UpdateMicroPositionDimensions()
 		prevButton = button
 	end
 
-	if AB.db.microbar.mouseover and not ElvUI_MicroBar:IsMouseOver() then
+	if self.db.microbar.mouseover and not ElvUI_MicroBar:IsMouseOver() then
 		ElvUI_MicroBar:SetAlpha(0)
 	else
 		ElvUI_MicroBar:SetAlpha(self.db.microbar.alpha)
@@ -311,9 +307,13 @@ function AB:UpdateMicroPositionDimensions()
 	end
 
 	local style = self.db.microbar.transparentBackdrop and "Transparent" or "Default"
-	if ElvUI_MicroBar.backdrop then
-		ElvUI_MicroBar.backdrop:SetTemplate(style)
-		ElvUI_MicroBar.backdrop:Point("BOTTOMLEFT", 0, 1)
+	ElvUI_MicroBar.backdrop:SetTemplate(style)
+	ElvUI_MicroBar.backdrop:Point("BOTTOMLEFT", 0, 1)
+
+	if self.db.microbar.backdrop then
+		ElvUI_MicroBar.backdrop:Show()
+	else
+		ElvUI_MicroBar.backdrop:Hide()
 	end
 
 	if ElvUI_MicroBar.mover then
@@ -325,8 +325,6 @@ function AB:UpdateMicroPositionDimensions()
 	end
 
 	if not Sbuttons[1] then return end
-
-	AB:MenuShow()
 
 	local numRowsS = 1
 	prevButton = ElvUI_MicroBarS
@@ -356,65 +354,28 @@ function AB:UpdateMicroPositionDimensions()
 		ElvUI_MicroBarS:CreateBackdrop()
 	end
 
-	if ElvUI_MicroBarS.backdrop then
-		ElvUI_MicroBarS.backdrop:SetTemplate(style)
-		ElvUI_MicroBarS.backdrop:Point("BOTTOMLEFT", 0, 1)
-	end
+	ElvUI_MicroBarS.backdrop:SetTemplate(style)
+	ElvUI_MicroBarS.backdrop:Point("BOTTOMLEFT", 0, 1)
 
-	if AB.db.microbar.backdrop then
-		ElvUI_MicroBar.backdrop:Show()
+	if self.db.microbar.backdrop then
 		ElvUI_MicroBarS.backdrop:Show()
 	else
-		ElvUI_MicroBar.backdrop:Hide()
 		ElvUI_MicroBarS.backdrop:Hide()
 	end
 
-	if AB.db.microbar.mouseover and not ElvUI_MicroBar:IsMouseOver() then
+	if self.db.microbar.mouseover and not ElvUI_MicroBar:IsMouseOver() then
 		ElvUI_MicroBarS:SetAlpha(0)
-	elseif not (AB.db.microbar.mouseover and ElvUI_MicroBar:IsMouseOver()) and AB.db.microbar.symbolic then
-		ElvUI_MicroBarS:SetAlpha(AB.db.microbar.alpha)
+	elseif not (self.db.microbar.mouseover and ElvUI_MicroBar:IsMouseOver()) and self.db.microbar.symbolic then
+		ElvUI_MicroBarS:SetAlpha(self.db.microbar.alpha)
 	end
 
-	AB:SetSymbloColor()
-	AB:UpdateMicroBarVisibility()
-end
-
-function AB:MenuShow()
-	if AB.db.microbar.enabled then
-		if AB.db.microbar.symbolic then
-			ElvUI_MicroBar:Hide()
-			ElvUI_MicroBarS:Show()
-			if not AB.db.microbar.mouseover then
-				E:UIFrameFadeIn(ElvUI_MicroBarS, 0.2, ElvUI_MicroBarS:GetAlpha(), AB.db.microbar.alpha)
-			end
-		else
-			ElvUI_MicroBarS:Hide()
-			ElvUI_MicroBar:Show()
-		end
-	else
-		if AB.db.microbar.symbolic then
-			ElvUI_MicroBarS:Hide()
-		else
-			ElvUI_MicroBar:Hide()
-		end
-	end
+	self:SetSymbloColor()
+	self:UpdateMicroBarVisibility()
 end
 
 function AB:EnhancementInit()
 	EP:RegisterPlugin(addon, AB.GetOptions)
-	AB:SetupSymbolBar()
-	AB:MenuShow()
-
-	ElvUI_MicroBar.visibility:SetScript("OnShow", function()
-		if not AB.db.microbar.symbolic then
-			ElvUI_MicroBar:Hide()
-			ElvUI_MicroBarS:Show()
-		else
-			ElvUI_MicroBar:Show()
-			ElvUI_MicroBarS:Hide()
-		end
-	end)
-	ElvUI_MicroBar.visibility:SetScript("OnHide", function() ElvUI_MicroBar:Hide() end)
+	self:SetupSymbolBar()
 
 	_G["EMB_MenuSys"]:SetScript("OnUpdate", function(self, elapsed)
 		if self.updateInterval > 0 then
