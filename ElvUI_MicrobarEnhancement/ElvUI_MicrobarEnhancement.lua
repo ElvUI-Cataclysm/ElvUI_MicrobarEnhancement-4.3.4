@@ -7,10 +7,12 @@ local addon = ...
 local _G = _G
 local tinsert = tinsert
 
+local CreateFrame = CreateFrame
 local HideUIPanel, ShowUIPanel = HideUIPanel, ShowUIPanel
 local GameTooltip = GameTooltip
 local UnitLevel = UnitLevel
-local LoadAddOn = LoadAddOn
+local IsAddOnLoaded = IsAddOnLoaded
+local PlaySound = PlaySound
 local MainMenuBarPerformanceBarFrame_OnEnter = MainMenuBarPerformanceBarFrame_OnEnter
 local MicroButtonTooltipText = MicroButtonTooltipText
 local ToggleFrame = ToggleFrame
@@ -23,6 +25,7 @@ local ToggleRaidFrame = ToggleRaidFrame
 local ToggleHelpFrame = ToggleHelpFrame
 local CHARACTER_INFO, SPELLBOOK_ABILITIES_BUTTON, TALENTS_BUTTON, ACHIEVEMENT_BUTTON, QUESTLOG_BUTTON = CHARACTER_INFO, SPELLBOOK_ABILITIES_BUTTON, TALENTS_BUTTON, ACHIEVEMENT_BUTTON, QUESTLOG_BUTTON
 local GUILD, PLAYER_V_PLAYER, DUNGEONS_BUTTON, ENCOUNTER_JOURNAL, RAID_FINDER, MAINMENU_BUTTON, HELP_BUTTON = GUILD, PLAYER_V_PLAYER, DUNGEONS_BUTTON, ENCOUNTER_JOURNAL, RAID_FINDER, MAINMENU_BUTTON, HELP_BUTTON
+local SHOW_PVP_LEVEL, SHOW_LFD_LEVEL = SHOW_PVP_LEVEL, SHOW_LFD_LEVEL
 local PERFORMANCEBAR_UPDATE_INTERVAL = PERFORMANCEBAR_UPDATE_INTERVAL
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 local COLOR = COLOR
@@ -205,14 +208,12 @@ function AB:SetupSymbolBar()
 	AB:CreateSymbolButton("EMB_Spellbook", L["SPELLBOOK_SYMBOL"], MicroButtonTooltipText(SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK"), function() ToggleFrame(_G["SpellBookFrame"]) end)
 	AB:CreateSymbolButton("EMB_Talents", L["TALENTS_SYMBOL"], MicroButtonTooltipText(TALENTS_BUTTON, "TOGGLETALENTS"), function()
 		if UnitLevel("player") >= 10 then
-			if PlayerTalentFrame then
-				if PlayerTalentFrame:IsShown() then
-					HideUIPanel(PlayerTalentFrame)
-				else
-					ShowUIPanel(PlayerTalentFrame)
-				end
+			if not PlayerTalentFrame then TalentFrame_LoadUI() end
+			if not GlyphFrame then GlyphFrame_LoadUI() end
+
+			if PlayerTalentFrame:IsShown() then
+				HideUIPanel(PlayerTalentFrame)
 			else
-				LoadAddOn("Blizzard_TalentUI")
 				ShowUIPanel(PlayerTalentFrame)
 			end
 		end
@@ -226,9 +227,20 @@ function AB:SetupSymbolBar()
 		end
 	end)
 	AB:CreateSymbolButton("EMB_Guild", L["GUILD_SYMBOL"],  MicroButtonTooltipText(GUILD, "TOGGLEGUILDTAB"), function() ToggleGuildFrame() end)
-	AB:CreateSymbolButton("EMB_PVP", L["PVP_SYMBOL"], MicroButtonTooltipText(PLAYER_V_PLAYER, "TOGGLECHARACTER4"), function() TogglePVPFrame() end)
-	AB:CreateSymbolButton("EMB_LFD", L["LFD_SYMBOL"], MicroButtonTooltipText(DUNGEONS_BUTTON, "TOGGLELFGPARENT"), function() ToggleLFDParentFrame() end)
-	AB:CreateSymbolButton("EMB_Journal", L["JOURNAL_SYMBOL"], MicroButtonTooltipText(ENCOUNTER_JOURNAL, "TOGGLEENCOUNTERJOURNAL"), function() ToggleEncounterJournal() end)
+	AB:CreateSymbolButton("EMB_PVP", L["PVP_SYMBOL"], MicroButtonTooltipText(PLAYER_V_PLAYER, "TOGGLECHARACTER4"), function()
+		if UnitLevel("player") >= SHOW_PVP_LEVEL then
+			TogglePVPFrame()
+		end
+	end)
+	AB:CreateSymbolButton("EMB_LFD", L["LFD_SYMBOL"], MicroButtonTooltipText(DUNGEONS_BUTTON, "TOGGLELFGPARENT"), function()
+		if UnitLevel("player") >= SHOW_LFD_LEVEL then
+			ToggleLFDParentFrame()
+		end
+	end)
+	AB:CreateSymbolButton("EMB_Journal", L["JOURNAL_SYMBOL"], MicroButtonTooltipText(ENCOUNTER_JOURNAL, "TOGGLEENCOUNTERJOURNAL"), function()
+	if not IsAddOnLoaded("Blizzard_EncounterJournal") then EncounterJournal_LoadUI() end
+		ToggleEncounterJournal()
+	end)
 	AB:CreateSymbolButton("EMB_LFR", L["LFR_SYMBOL"], MicroButtonTooltipText(RAID_FINDER, "TOGGLERAIDFINDER"), function() ToggleRaidFrame() end)
 	AB:CreateSymbolButton("EMB_MenuSys", L["MENU_SYMBOL"], MicroButtonTooltipText(MAINMENU_BUTTON, "TOGGLEGAMEMENU"), function()
 		if GameMenuFrame:IsShown() then
@@ -256,13 +268,8 @@ function AB:UpdateMicroBarVisibility()
 		visibility = visibility:gsub("[\n\r]","")
 	end
 
-	if self.db.microbar.symbolic then
-		RegisterStateDriver(ElvUI_MicroBar.visibility, "visibility", "hide")
-		RegisterStateDriver(ElvUI_MicroBarS.visibility, "visibility", (self.db.microbar.enabled and visibility) or "hide")
-	else
-		RegisterStateDriver(ElvUI_MicroBarS.visibility, "visibility", "hide")
-		RegisterStateDriver(ElvUI_MicroBar.visibility, "visibility", (self.db.microbar.enabled and visibility) or "hide")
-	end
+	RegisterStateDriver(ElvUI_MicroBar.visibility, "visibility", (self.db.microbar.enabled and not self.db.microbar.symbolic and visibility) or "hide")
+	RegisterStateDriver(ElvUI_MicroBarS.visibility, "visibility", (self.db.microbar.enabled and self.db.microbar.symbolic and visibility) or "hide")
 end
 
 function AB:UpdateMicroPositionDimensions()
@@ -363,9 +370,9 @@ function AB:UpdateMicroPositionDimensions()
 		ElvUI_MicroBarS.backdrop:Hide()
 	end
 
-	if self.db.microbar.mouseover and not ElvUI_MicroBar:IsMouseOver() then
+	if self.db.microbar.mouseover and not ElvUI_MicroBarS:IsMouseOver() then
 		ElvUI_MicroBarS:SetAlpha(0)
-	elseif not (self.db.microbar.mouseover and ElvUI_MicroBar:IsMouseOver()) and self.db.microbar.symbolic then
+	else
 		ElvUI_MicroBarS:SetAlpha(self.db.microbar.alpha)
 	end
 
