@@ -1,12 +1,10 @@
--- Portuguese localization file for ptBR.
-local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("ElvUI", "ptBR")
-if not L then return end
+-- Chinese localization file for zhCN.
+local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "zhCN")
 
 -- Config
 L["As Letters"] = true
 L["Transparent Backdrop"] = true
-L["Replace icons with just letters"] = true
+L["Replace icons with letters"] = true
 
 -- Symbols
 L["ACHIEVEMENT_SYMBOL"] = "A"

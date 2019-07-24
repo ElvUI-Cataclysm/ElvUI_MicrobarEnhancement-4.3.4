@@ -1,12 +1,10 @@
--- Korean localization file for koKR.
-local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("ElvUI", "koKR")
-if not L then return end
+-- German localization file for deDE.
+local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "deDE")
 
 -- Config
 L["As Letters"] = true
 L["Transparent Backdrop"] = true
-L["Replace icons with just letters"] = true
+L["Replace icons with letters"] = true
 
 -- Symbols
 L["ACHIEVEMENT_SYMBOL"] = "A"

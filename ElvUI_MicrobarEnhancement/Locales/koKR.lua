@@ -1,12 +1,10 @@
--- French localization file for frFR.
-local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("ElvUI", "frFR")
-if not L then return; end
+-- Korean localization file for koKR.
+local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "koKR")
 
 -- Config
 L["As Letters"] = true
 L["Transparent Backdrop"] = true
-L["Replace icons with just letters"] = true
+L["Replace icons with letters"] = true
 
 -- Symbols
 L["ACHIEVEMENT_SYMBOL"] = "A"

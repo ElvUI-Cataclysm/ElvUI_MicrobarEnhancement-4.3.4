@@ -1,12 +1,10 @@
-﻿-- English localization file for enGB.
-local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("ElvUI", "enUS", true)
-if not L then return end
+-- Portuguese localization file for ptBR.
+local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "ptBR")
 
 -- Config
 L["As Letters"] = true
 L["Transparent Backdrop"] = true
-L["Replace icons with just letters"] = true
+L["Replace icons with letters"] = true
 
 -- Symbols
 L["ACHIEVEMENT_SYMBOL"] = "A"

@@ -1,12 +1,10 @@
--- Chinese localization file for zhCN.
-local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("ElvUI", "zhCN")
-if not L then return end
+-- Taiwanese localization file for zhTW.
+local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "zhTW")
 
 -- Config
 L["As Letters"] = true
 L["Transparent Backdrop"] = true
-L["Replace icons with just letters"] = true
+L["Replace icons with letters"] = true
 
 -- Symbols
 L["ACHIEVEMENT_SYMBOL"] = "A"

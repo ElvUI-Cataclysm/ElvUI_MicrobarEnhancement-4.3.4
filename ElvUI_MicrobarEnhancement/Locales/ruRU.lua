@@ -1,12 +1,10 @@
--- Spanish localization file for esES and esMX.
-local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("ElvUI", "esES") or AceLocale:NewLocale("ElvUI", "esMX")
-if not L then return end
+﻿--Файл локализации для ruRU
+local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "ruRU")
 
 -- Config
-L["As Letters"] = true
-L["Transparent Backdrop"] = true
-L["Replace icons with just letters"] = true
+L["As Letters"] = "В виде букв"
+L["Transparent Backdrop"] = "Прозрачный фон"
+L["Replace icons with letters"] = "Заменить иконки буквами"
 
 -- Symbols
 L["ACHIEVEMENT_SYMBOL"] = "A"
