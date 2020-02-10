@@ -1,9 +1,9 @@
 -- Portuguese localization file for ptBR.
 local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "ptBR")
+if not L then return end
 
 -- Config
 L["As Letters"] = true
-L["Transparent Backdrop"] = true
 L["Replace icons with letters"] = true
 
 -- Symbols

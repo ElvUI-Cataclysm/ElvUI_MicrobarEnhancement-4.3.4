@@ -1,9 +1,9 @@
 -- Taiwanese localization file for zhTW.
 local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "zhTW")
+if not L then return end
 
 -- Config
 L["As Letters"] = true
-L["Transparent Backdrop"] = true
 L["Replace icons with letters"] = true
 
 -- Symbols

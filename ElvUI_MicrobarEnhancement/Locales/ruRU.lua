@@ -1,9 +1,9 @@
 ﻿--Файл локализации для ruRU
 local L = ElvUI[1].Libs.ACL:NewLocale("ElvUI", "ruRU")
+if not L then return end
 
 -- Config
 L["As Letters"] = "В виде букв"
-L["Transparent Backdrop"] = "Прозрачный фон"
 L["Replace icons with letters"] = "Заменить иконки буквами"
 
 -- Symbols

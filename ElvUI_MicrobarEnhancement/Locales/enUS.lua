@@ -4,7 +4,6 @@ if not L then return end
 
 -- Config
 L["As Letters"] = true
-L["Transparent Backdrop"] = true
 L["Replace icons with letters"] = true
 
 -- Symbols

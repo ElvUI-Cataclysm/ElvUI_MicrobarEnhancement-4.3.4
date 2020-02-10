@@ -11,18 +11,18 @@ local pairs = pairs
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
 local MICRO_BUTTONS = {
-	["CharacterMicroButton"] = L["CHARACTER_SYMBOL"],
-	["SpellbookMicroButton"] = L["SPELLBOOK_SYMBOL"],
-	["TalentMicroButton"] = L["TALENTS_SYMBOL"],
-	["AchievementMicroButton"] = L["ACHIEVEMENT_SYMBOL"],
-	["QuestLogMicroButton"] = L["QUEST_SYMBOL"],
-	["GuildMicroButton"] = L["GUILD_SYMBOL"],
-	["PVPMicroButton"] = L["PVP_SYMBOL"],
-	["LFDMicroButton"] = L["LFD_SYMBOL"],
-	["EJMicroButton"] = L["JOURNAL_SYMBOL"],
-	["RaidMicroButton"] = L["LFR_SYMBOL"],
-	["MainMenuMicroButton"] = L["MENU_SYMBOL"],
-	["HelpMicroButton"] = L["HELP_SYMBOL"]
+	CharacterMicroButton = L["CHARACTER_SYMBOL"],
+	SpellbookMicroButton = L["SPELLBOOK_SYMBOL"],
+	TalentMicroButton = L["TALENTS_SYMBOL"],
+	AchievementMicroButton = L["ACHIEVEMENT_SYMBOL"],
+	QuestLogMicroButton = L["QUEST_SYMBOL"],
+	GuildMicroButton = L["GUILD_SYMBOL"],
+	PVPMicroButton = L["PVP_SYMBOL"],
+	LFDMicroButton = L["LFD_SYMBOL"],
+	EJMicroButton = L["JOURNAL_SYMBOL"],
+	RaidMicroButton = L["LFR_SYMBOL"],
+	MainMenuMicroButton = L["MENU_SYMBOL"],
+	HelpMicroButton = L["HELP_SYMBOL"]
 }
 
 function AB:SetSymbloColor()
@@ -40,7 +40,7 @@ function AB:HandleMicroButton(button)
 	local text = MICRO_BUTTONS[button:GetName()]
 	button.text = button:CreateFontString(nil, "OVERLAY")
 	button.text:FontTemplate()
-	button.text:Point("CENTER", button, "CENTER", 0, -1)
+	button.text:Point("CENTER", button, "CENTER", 1, -1)
 	button.text:SetJustifyH("CENTER")
 	button.text:SetText(text)
 end
@@ -88,7 +88,7 @@ function AB:EnhancementInit()
 
 	MicroButtonPortrait:SetDrawLayer("ARTWORK", 1)
 	PVPMicroButtonTexture:SetDrawLayer("ARTWORK", 1)
-	
+
 	GuildMicroButtonTabardBackground:SetDrawLayer("ARTWORK", 0)
 	GuildMicroButtonTabardEmblem:SetDrawLayer("ARTWORK", 1)
 end
