@@ -1,7 +1,7 @@
 ﻿## Interface: 40300
 ## Title: |cffff7000E|r|cffe5e3e3lvUI|r |cffff7000M|r|cffe5e3e3icrobar|r |cffff7000E|r|cffe5e3e3nhancement|r
 ## Author: Darth Predator
-## Version: 1.77
+## Version: 1.1
 ## RequiredDeps: ElvUI
 ## DefaultState: Enabled
 
