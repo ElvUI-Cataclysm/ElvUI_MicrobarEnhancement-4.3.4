@@ -1,6 +1,5 @@
 ﻿local E, L, V, P, G = unpack(ElvUI)
 local AB = E:GetModule("ActionBars")
-local S = E:GetModule("Skins")
 local EP = E.Libs.EP
 
 local addonName = ...
@@ -8,7 +7,7 @@ local addonName = ...
 local _G = _G
 local pairs = pairs
 
-local RAID_CLASS_COLORS = RAID_CLASS_COLORS
+local PRIEST_COLOR = RAID_CLASS_COLORS.PRIEST
 
 local MICRO_BUTTONS = {
 	CharacterMicroButton = L["CHARACTER_SYMBOL"],
@@ -26,7 +25,8 @@ local MICRO_BUTTONS = {
 }
 
 function AB:SetSymbloColor()
-	local color = AB.db.microbar.classColor and (E.myclass == "PRIEST" and E.PriestColors or (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass])) or AB.db.microbar.colorS
+	local colorClass = E:ClassColor(E.myclass) or PRIEST_COLOR
+	local color = AB.db.microbar.classColor and colorClass or AB.db.microbar.colorS
 
 	for button in pairs(MICRO_BUTTONS) do
 		_G[button].text:SetTextColor(color.r, color.g, color.b)
@@ -49,35 +49,23 @@ local oldUpdateMicroPositionDimensions = AB.UpdateMicroPositionDimensions
 function AB:UpdateMicroPositionDimensions()
 	oldUpdateMicroPositionDimensions(self)
 
-	if not ElvUI_MicroBar.backdrop then
-		ElvUI_MicroBar:CreateBackdrop()
-	end
-
-	ElvUI_MicroBar.backdrop:SetTemplate(AB.db.microbar.transparentBackdrop and "Transparent" or "Default")
-	ElvUI_MicroBar.backdrop:SetOutside(ElvUI_MicroBar, AB.db.microbar.backdropSpacing, AB.db.microbar.backdropSpacing)
-
-	if AB.db.microbar.backdrop then
-		ElvUI_MicroBar.backdrop:Show()
-	else
-		ElvUI_MicroBar.backdrop:Hide()
-	end
+	local symbol = AB.db.microbar.symbolic
 
 	for button in pairs(MICRO_BUTTONS) do
 		local b = _G[button]
 
-		if AB.db.microbar.symbolic then
-			b:DisableDrawLayer("ARTWORK")
-			b:EnableDrawLayer("OVERLAY")
+		b.backdrop:SetTemplate(symbol and AB.db.microbar.transparentButtons and "Transparent" or "Default", true)
 
-			GuildMicroButtonTabard.emblem:Hide()
-			GuildMicroButtonTabard.background:Hide()
-		else
-			b:EnableDrawLayer("ARTWORK")
-			b:DisableDrawLayer("OVERLAY")
+		b:DisableDrawLayer(symbol and "ARTWORK" or "OVERLAY")
+		b:EnableDrawLayer(symbol and "OVERLAY" or "ARTWORK")
+	end
 
-			GuildMicroButtonTabard.emblem:Show()
-			GuildMicroButtonTabard.background:Show()
-		end
+	if symbol then
+		GuildMicroButtonTabard.emblem:Hide()
+		GuildMicroButtonTabard.background:Hide()
+	else
+		GuildMicroButtonTabard.emblem:Show()
+		GuildMicroButtonTabard.background:Show()
 	end
 
 	AB:SetSymbloColor()
@@ -88,9 +76,7 @@ function AB:EnhancementInit()
 
 	MicroButtonPortrait:SetDrawLayer("ARTWORK", 1)
 	PVPMicroButtonTexture:SetDrawLayer("ARTWORK", 1)
-
-	GuildMicroButtonTabardBackground:SetDrawLayer("ARTWORK", 0)
-	GuildMicroButtonTabardEmblem:SetDrawLayer("ARTWORK", 1)
+	MainMenuBarDownload:SetDrawLayer("ARTWORK", 1)
 end
 
 hooksecurefunc(AB, "SetupMicroBar", AB.EnhancementInit)
